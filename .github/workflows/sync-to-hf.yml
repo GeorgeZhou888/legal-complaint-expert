@@ -3,16 +3,18 @@ name: Sync to Hugging Face Space
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Sync to HF Space
         uses: alex-bene/huggingface-space-sync-action@v1
         with:
           huggingface_repo_id: GeorgeZhou888/legal-complaint-expert
           github_branch: main
           hf_token: ${{ secrets.HF_TOKEN }}
-          git_lfs: true  # 处理大文件
+          git_lfs: true  # 处理大文件如 knowledge.zip
