@@ -1,27 +1,18 @@
-name: Sync to Hugging Face hub
+name: Sync to Hugging Face Space
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
-  sync-to-hub:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Sync to HF Space
+        uses: alex-bene/huggingface-space-sync-action@v1
         with:
-          fetch-depth: 0
-          lfs: true
-
-      - name: Push to hub
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_USERNAME: GeorgeZhou888
-          HF_SPACE: legal-complaint-expert
-        run: |
-          git remote add space https://$$ {HF_USERNAME}: $${HF_TOKEN}@huggingface.co/spaces/$$ {HF_USERNAME}/ $${HF_SPACE} || git remote set-url space https://$$ {HF_USERNAME}: $${HF_TOKEN}@huggingface.co/spaces/$$ {HF_USERNAME}/ $${HF_SPACE}
-          git pull space main --allow-unrelated-histories --force  # 先拉取远程变化解决 fetch first
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git push space main --force
+          huggingface_repo_id: GeorgeZhou888/legal-complaint-expert
+          github_branch: main
+          hf_token: ${{ secrets.HF_TOKEN }}
+          git_lfs: true  # 处理大文件
