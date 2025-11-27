@@ -1,20 +1,36 @@
-name: Sync to Hugging Face Space
-
+name:  Sync to Hugging Face Hub
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main  # 仅在 main 分支被推送时触发
 
 jobs:
-  sync:
+  sync-to-hub:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Sync to HF Space
-        uses: alex-bene/huggingface-space-sync-action@v1
+      # 步骤 1: 检出 GitHub 仓库代码
+      # fetch-depth: 0 拉取所有历史，这对于 LFS 和正确的推送至关重要
+      # lfs: true 会自动拉取你仓库中的 LFS 文件 (比如 knowledge.zip)
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          huggingface_repo_id: GeorgeZhou888/legal-complaint-expert
-          github_branch: main
+          fetch-depth: 0
+          lfs: true
+
+      # 步骤 2: 推送到 Hugging Face Space
+      # 我们使用一个专门为此维护的 Action: peaceiris/actions-huggingface-hub
+      - name: Push to Hub
+        uses: peaceiris/actions-huggingface-hub@v0
+        with:
+          # 你的 HF Space 仓库 ID，格式为 "用户名/Space名"
+          repo_id: GeorgeZhou888/legal-complaint-expert
+          
+          # 明确仓库类型为 Space
+          repo_type: space
+          
+          # 传递你储存在 GitHub Secrets 中的 HF_TOKEN
           hf_token: ${{ secrets.HF_TOKEN }}
-          git_lfs: true  # 处理大文件如 knowledge.zip
+          
+          # 强制推送：这将彻底解决 [rejected] (fetch first) 问题
+          # 它的逻辑是：GitHub 仓库永远是“唯一真相来源”，HF Space 只是它的一个镜像。
+          force_push: true
